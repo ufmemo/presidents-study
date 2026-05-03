@@ -35,8 +35,8 @@ export interface President {
   era: Era;
   /** APUSH-relevant facts. Aim for 3–5 per presidency. */
   facts: string[];
-  /** Filename in /public/i/ — undefined if no portrait is available yet. */
+  /** Filename in /public/i/presidents/ — undefined if no portrait is available yet. */
   image?: string;
 }
 
-export type Mode = 'flashcards' | 'order' | 'multiple';
+export type Mode = 'flashcards' | 'multiple' | 'lineage' | 'lineage-study';

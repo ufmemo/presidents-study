@@ -44,44 +44,133 @@
   display: none;
 }
 
-/* ---------- Mode selector (iOS-style segmented control) ---------- */
+/* ---------- Mode menu (compact pill + popover) ----------
+   The pill shows the current mode with a chevron; tapping opens a popover
+   with all modes. Replaces the old segmented control to give the canvas
+   modes (especially Lineage) more vertical room. */
 
-.mode-selector {
+.mode-menu {
   flex-shrink: 0;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
-  background: rgba(11, 37, 69, 0.07);
-  padding: 4px;
-  border-radius: 10px;
+  display: flex;
+  justify-content: flex-start;
+  position: relative;
+  z-index: 10;
 }
 
-.mode-tab {
+.mode-menu-trigger {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 1px;
-  min-height: 40px;
-  padding: 5px 4px;
-  border: none;
-  border-radius: 7px;
-  background: transparent;
-  color: var(--text);
+  gap: 6px;
+  background: rgba(11, 37, 69, 0.07);
+  color: var(--navy);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 12px 5px 14px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  min-height: 32px;
+  cursor: pointer;
   transition:
     background 0.15s,
-    color 0.15s,
-    box-shadow 0.15s;
-  font-weight: 500;
+    border-color 0.15s;
 }
 
-.mode-tab.active {
+.mode-menu-trigger:active,
+.mode-menu-trigger[aria-expanded="true"] {
+  background: rgba(11, 37, 69, 0.12);
+  border-color: rgba(11, 37, 69, 0.25);
+}
+
+.mode-menu-trigger-chev {
+  font-size: 0.78rem;
+  opacity: 0.6;
+  line-height: 1;
+}
+
+.mode-menu-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 220px;
   background: var(--paper);
-  color: var(--navy);
-  box-shadow: 0 1px 3px rgba(11, 37, 69, 0.12);
-  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 100;
+  animation: mode-menu-pop 0.12s ease-out;
 }
 
+@keyframes mode-menu-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mode-menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  color: var(--text);
+  min-height: 44px;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+
+.mode-menu-item:active {
+  background: rgba(11, 37, 69, 0.08);
+}
+
+.mode-menu-item.active {
+  background: var(--navy);
+  color: white;
+}
+
+.mode-menu-item-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.mode-menu-item-hint {
+  font-size: 0.75rem;
+  opacity: 0.6;
+  line-height: 1.2;
+}
+
+.mode-menu-item.active .mode-menu-item-hint {
+  opacity: 0.85;
+}
+
+@media (hover: hover) {
+  .mode-menu-trigger:hover {
+    background: rgba(11, 37, 69, 0.12);
+  }
+  .mode-menu-item:hover:not(.active) {
+    background: rgba(11, 37, 69, 0.06);
+  }
+}
+
+/* Inner spans of difficulty toggles (StartScreen / CompleteScreen) reuse
+   these label sizes. Kept here so DifficultyToggle stays styled. */
 .mode-tab-label {
   font-size: 0.85rem;
 }
@@ -89,6 +178,148 @@
 .mode-tab-hint {
   font-size: 0.65rem;
   opacity: 0.6;
+}
+
+/* ---------- Splash screen ----------
+   Tiled portraits as a faded wallpaper, centered card with title + menu.
+   Mounts when the URL hash is empty (or invalid). */
+
+.splash {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(20px + var(--safe-top)) calc(20px + var(--safe-right))
+    calc(20px + var(--safe-bottom)) calc(20px + var(--safe-left));
+  background: var(--cream);
+}
+
+.splash-wallpaper {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 6px;
+  padding: 8px;
+  opacity: 0.22;
+  pointer-events: none;
+  align-content: start;
+}
+
+.splash-tile {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+/* Strip the heavy treatment from the regular .portrait so wallpaper tiles
+   stay quiet — no shadow, thin border, no transform. */
+.splash-tile .portrait {
+  width: 100% !important;
+  height: 100% !important;
+  border: 1px solid rgba(11, 37, 69, 0.18);
+  box-shadow: none;
+  margin: 0;
+  transform: none;
+}
+
+.splash-card {
+  position: relative;
+  z-index: 1;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 22px 18px 18px;
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+}
+
+.splash-title {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--navy);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+
+.splash-subtitle {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.splash-menu {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.splash-menu-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 2px 12px;
+  width: 100%;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text);
+  min-height: 56px;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.splash-menu-item:active {
+  background: rgba(11, 37, 69, 0.06);
+}
+
+.splash-menu-label {
+  grid-column: 1;
+  grid-row: 1;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.2;
+}
+
+.splash-menu-hint {
+  grid-column: 1;
+  grid-row: 2;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.2;
+}
+
+.splash-menu-arrow {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  font-size: 1.1rem;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+@media (hover: hover) {
+  .splash-menu-item:hover {
+    background: rgba(11, 37, 69, 0.04);
+    border-color: var(--navy);
+  }
 }
 
 /* ---------- Buttons ---------- */
@@ -130,13 +361,20 @@
 /* ---------- Portrait ---------- */
 
 .portrait {
+  --pp: 6px; /* padding + border width */
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* Bias the crop upward so faces (typically in the upper third of formal
+     portraits) sit in the middle of the circular frame instead of getting
+     cut off at the top. Lower percentages = more of the top is shown. */
+  object-position: center 20%;
   border-radius: 50%;
   background: rgba(11, 37, 69, 0.08);
-  border: 3px solid var(--paper);
+  border: var(--pp) solid #777;
+  margin: var(--pp);
   box-shadow: 0 4px 14px rgba(11, 37, 69, 0.18);
+  transform: translateX(calc(-1 * var(--pp))) translateY(calc(-1 * var(--pp)));
 }
 
 .portrait-fallback {
@@ -253,7 +491,7 @@
   min-width: 54px;
   height: 54px;
   padding: 0 12px;
-  border-radius: 27px;
+  border-radius: 50%;
   background: var(--navy);
   color: white;
   font-weight: 800;
@@ -378,167 +616,6 @@
   gap: 8px;
 }
 
-/* ---------- Order Quiz ---------- */
-
-.order-quiz {
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.order-prompt {
-  flex-shrink: 0;
-  color: var(--muted);
-  font-size: 0.85rem;
-  text-align: center;
-  padding: 0 4px;
-}
-
-.order-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  counter-reset: order;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
-.order-item {
-  background: var(--paper);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 8px 10px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: var(--shadow);
-  counter-increment: order;
-  min-height: 52px;
-}
-
-.order-item::before {
-  content: counter(order);
-  flex-shrink: 0;
-  width: 26px;
-  height: 26px;
-  background: var(--navy);
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.82rem;
-}
-
-.order-item.correct {
-  border-color: var(--green);
-  background: rgba(31, 122, 58, 0.06);
-}
-
-.order-item.correct::before {
-  background: var(--green);
-}
-
-.order-item.wrong {
-  border-color: var(--red);
-  background: rgba(179, 38, 30, 0.06);
-}
-
-.order-item.wrong::before {
-  background: var(--red);
-}
-
-.order-item-text {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.order-item-name {
-  font-weight: 600;
-  color: var(--navy);
-  font-size: 0.95rem;
-}
-
-.order-item-meta {
-  font-size: 0.76rem;
-  color: var(--muted);
-}
-
-.order-item-actions {
-  display: flex;
-  gap: 4px;
-}
-
-.order-item-actions button {
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--border);
-  background: var(--paper);
-  border-radius: 8px;
-  font-size: 1.1rem;
-  color: var(--navy);
-  font-weight: 600;
-}
-
-.order-item-actions button:active:not(:disabled) {
-  background: rgba(11, 37, 69, 0.08);
-}
-
-.order-correct {
-  flex-shrink: 0;
-  background: rgba(179, 38, 30, 0.05);
-  border: 1px solid rgba(179, 38, 30, 0.2);
-  border-radius: 12px;
-  padding: 10px 12px;
-  font-size: 0.88rem;
-  max-height: 38vh;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.order-correct ol {
-  margin: 6px 0 0;
-  padding-left: 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.order-correct .muted {
-  color: var(--muted);
-  font-size: 0.78rem;
-}
-
-.order-success {
-  flex-shrink: 0;
-  background: rgba(31, 122, 58, 0.08);
-  border: 1px solid rgba(31, 122, 58, 0.3);
-  color: var(--green);
-  border-radius: 12px;
-  padding: 12px 14px;
-  font-weight: 600;
-  text-align: center;
-}
-
-.order-actions {
-  flex-shrink: 0;
-  display: flex;
-}
-
-.order-actions .primary-btn {
-  width: 100%;
-}
-
 /* ---------- Multiple Choice ---------- */
 
 .multiple-choice {
@@ -650,6 +727,500 @@
   margin-top: 2px;
 }
 
+/* ---------- Lineage ---------- */
+
+.lineage {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.lineage-viewport {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow: var(--shadow);
+}
+
+.lineage-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* ----- Cards ----- */
+
+.lineage-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  /* When the trail length grows, the previous active's `top` shifts up to
+     the tighter past-spacing position. This transition makes the slide
+     smooth. The morph card sets its own `transition: transform` inline,
+     which overrides this for that card only. */
+  transition: top 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lineage-card-portrait {
+  position: relative;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.lineage-card-portrait .portrait {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Opaque "?" placeholder used in place of the portrait when the
+   "hide images" toggle is on, so photo style doesn't leak the era. */
+.lineage-card-hidden {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(11, 37, 69, 0.08);
+  border: 6px solid #777;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.6rem;
+  line-height: 1;
+  font-weight: 800;
+  color: var(--muted);
+  box-shadow: 0 4px 14px rgba(11, 37, 69, 0.18);
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+.lineage-card-number {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 7px;
+  border-radius: 13px;
+  background: var(--navy);
+  color: white;
+  font-weight: 800;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--paper);
+  box-shadow: 0 1px 4px rgba(11, 37, 69, 0.25);
+  font-variant-numeric: tabular-nums;
+}
+
+.lineage-card-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  line-height: 1.1;
+  padding: 4px 20px;
+  border: 2px solid #777;
+  max-width: 140px;
+  border-radius: 12px;
+  pointer-events: none;
+  background-color: white;
+}
+
+.lineage-card-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+/* Past-pick row layout: name on the left, term on the right. The width is
+   set inline from SIDE_LABEL_WIDTH in Lineage.tsx so there's only one place
+   to tune the row width. */
+.lineage-card-side {
+  flex-shrink: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  display: flex;
+  align-items: center;
+}
+
+/* Term sits on the left of the portrait; aligned right so the digits hug
+   the portrait edge. */
+.lineage-card-side-term {
+  justify-content: flex-end;
+  text-align: right;
+  padding-right: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Name sits on the right of the portrait; aligned left so the first letter
+   hugs the portrait edge. */
+.lineage-card-side-name {
+  justify-content: flex-start;
+  text-align: left;
+  padding-left: 12px;
+}
+
+.lineage-card-num-text {
+  font-size: 0.68rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* ----- Card variants ----- */
+
+.lineage-card-active .lineage-card-portrait {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 50%;
+}
+
+.lineage-card-active .lineage-card-name {
+  color: var(--navy);
+  font-weight: 700;
+}
+
+.lineage-card-past .lineage-card-portrait {
+  opacity: 0.92;
+}
+
+.lineage-card-candidate {
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+
+.lineage-card-candidate:active .lineage-card-portrait {
+  transform: scale(0.96);
+}
+
+@media (hover: hover) {
+  .lineage-card-candidate:hover .lineage-card-portrait {
+    outline: 3px solid var(--navy-light);
+    outline-offset: 3px;
+    border-radius: 50%;
+  }
+}
+
+/* Outline mode: replace the portrait area with a chip */
+.lineage-card.is-outline {
+  height: auto !important;
+}
+
+.lineage-card.is-outline .lineage-card-label {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 6px 10px;
+  flex-direction: row;
+  gap: 4px;
+  box-shadow: var(--shadow);
+}
+
+.lineage-card-active.is-outline .lineage-card-label {
+  background: var(--navy);
+  border-color: var(--navy);
+}
+
+.lineage-card-active.is-outline .lineage-card-name,
+.lineage-card-active.is-outline .lineage-card-num-text {
+  color: white;
+}
+
+.lineage-card-candidate.is-outline .lineage-card-label {
+  opacity: 0.55;
+  background: rgba(255, 255, 255, 0.7);
+  border-style: dashed;
+}
+
+.lineage-card-past.is-outline .lineage-card-label {
+  background: var(--paper);
+}
+
+/* ----- Animations ----- */
+
+.lineage-card.is-shaking .lineage-card-portrait {
+  outline: 3px solid var(--red);
+  outline-offset: 3px;
+  border-radius: 50%;
+  animation: lineage-shake 0.36s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.lineage-card.is-shaking.is-outline .lineage-card-label {
+  border-color: var(--red);
+  background: rgba(179, 38, 30, 0.1);
+  animation: lineage-shake 0.36s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes lineage-shake {
+  10%,
+  90% {
+    transform: translateX(-3px);
+  }
+  20%,
+  80% {
+    transform: translateX(5px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-7px);
+  }
+  40%,
+  60% {
+    transform: translateX(7px);
+  }
+}
+
+.lineage-card.is-fading {
+  pointer-events: none;
+  animation: lineage-fade-out 0.25s ease-out forwards;
+}
+
+@keyframes lineage-fade-out {
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+/* ----- HUD ----- */
+
+.lineage-hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.lineage-hud-btn {
+  pointer-events: auto;
+  align-self: flex-start;
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  color: var(--navy);
+  font-weight: 600;
+  box-shadow: var(--shadow);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.lineage-hud-btn:active {
+  background: rgba(11, 37, 69, 0.06);
+}
+
+.lineage-restart {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 0.74rem;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.lineage-hide-toggle {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 0.74rem;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.lineage-hide-toggle.active {
+  background: var(--navy);
+  color: white;
+  border-color: var(--navy);
+}
+
+/* Sit just below the hide-toggle so both are visible at once. */
+.lineage-zoom-chip {
+  position: absolute;
+  top: 48px;
+  left: 10px;
+  font-variant-numeric: tabular-nums;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.lineage-recenter {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--navy);
+  color: white;
+  border-color: var(--navy);
+  align-self: center;
+}
+
+.lineage-recenter:active {
+  background: var(--navy-light);
+}
+
+/* ----- Modal (Start over confirm) ----- */
+
+.lineage-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 37, 69, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  padding: 16px;
+}
+
+.lineage-modal {
+  background: var(--paper);
+  border-radius: 16px;
+  padding: 18px 18px 14px;
+  max-width: 320px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lineage-modal h3 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 1.1rem;
+}
+
+.lineage-modal p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.lineage-modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.lineage-modal-actions button {
+  flex: 1;
+}
+
+/* ----- Start / Complete screens ----- */
+
+.lineage-screen {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.lineage-screen-card {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 22px 20px 20px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+}
+
+.lineage-screen-card h2 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 1.45rem;
+  letter-spacing: -0.01em;
+}
+
+.lineage-screen-card p {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.lineage-difficulty {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.lineage-diff-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 56px;
+  padding: 8px;
+  background: rgba(11, 37, 69, 0.05);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  color: var(--text);
+  font-family: inherit;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.lineage-diff-tab.active {
+  background: var(--paper);
+  border-color: var(--navy);
+  color: var(--navy);
+}
+
+.lineage-diff-tab .mode-tab-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.lineage-diff-tab .mode-tab-hint {
+  font-size: 0.72rem;
+  opacity: 0.7;
+}
+
 /* ---------- Larger phones / tablets / desktop ---------- */
 
 @media (min-width: 480px) {
@@ -705,19 +1276,11 @@
 
 /* Hover styles only on devices that have hover (skip iPhone) */
 @media (hover: hover) {
-  .mode-tab:hover:not(.active) {
-    background: rgba(11, 37, 69, 0.05);
-  }
-
   .primary-btn:hover:not(:disabled) {
     background: var(--navy-light);
   }
 
   .ghost-btn:hover {
-    background: rgba(11, 37, 69, 0.05);
-  }
-
-  .order-item-actions button:hover:not(:disabled) {
     background: rgba(11, 37, 69, 0.05);
   }
 

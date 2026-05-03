@@ -4,6 +4,9 @@ interface Props {
   president: President;
   /** Pixel size; defaults to a CSS-driven size if not provided. */
   size?: number;
+  /** Folder path inside /public to load the image from, e.g. "i/funny/".
+   * Defaults to "i/presidents/". */
+  imageBase?: string;
 }
 
 function initials(name: string): string {
@@ -13,7 +16,11 @@ function initials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-export function Portrait({ president, size }: Props) {
+export function Portrait({
+  president,
+  size,
+  imageBase = "i/presidents/",
+}: Props) {
   const style = size ? { width: size, height: size } : undefined;
 
   if (!president.image) {
@@ -24,7 +31,7 @@ export function Portrait({ president, size }: Props) {
     );
   }
 
-  const src = `${import.meta.env.BASE_URL}i/${president.image}`;
+  const src = `${import.meta.env.BASE_URL}${imageBase}${president.image}`;
   return (
     <img
       className="portrait"

@@ -1,7 +1,7 @@
 import type { President } from '../types';
 
 /**
- * Portrait filenames in /public/i/, keyed by presidency number.
+ * Portrait filenames in /public/i/presidents/, keyed by presidency number.
  * Cleveland (#22, #24) and any future repeat-term presidents map to distinct files.
  * Missing entries (#31 Hoover, #35 Kennedy, #38 Ford, #39 Carter) render a fallback.
  */

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { Mode, President } from "../types";
 import { Portrait } from "./Portrait";
 
@@ -8,9 +9,20 @@ const MODES: { id: Mode; label: string; hint: string }[] = [
   { id: "lineage", label: "Lineage Game", hint: "Test yourself" },
 ];
 
-// Tiles needed to comfortably fill a tall viewport. Repeats the 46-president
-// set as needed.
-const WALLPAPER_TILE_COUNT = 80;
+// Approximate cell size in pixels (cell width + gap), matches the CSS
+// `grid-template-columns: repeat(auto-fill, minmax(64px, 1fr))` plus 6px gap.
+const TILE_CELL_SIZE = 70;
+// Min/max guards: don't render fewer than ~one mobile screen, don't render
+// more than the cap on huge displays (DOM perf).
+const MIN_TILES = 80;
+const MAX_TILES = 800;
+
+function calcTileCount(w: number, h: number): number {
+  const cols = Math.ceil(w / TILE_CELL_SIZE);
+  const rows = Math.ceil(h / TILE_CELL_SIZE);
+  // +20 buffer covers partial rows and the safe-area padding.
+  return Math.min(Math.max(cols * rows + 20, MIN_TILES), MAX_TILES);
+}
 
 interface Props {
   presidents: President[];
@@ -18,8 +30,22 @@ interface Props {
 }
 
 export function Splash({ presidents, onSelect }: Props) {
+  const [tileCount, setTileCount] = useState(() =>
+    typeof window === "undefined"
+      ? MIN_TILES
+      : calcTileCount(window.innerWidth, window.innerHeight),
+  );
+
+  useEffect(() => {
+    const onResize = () => {
+      setTileCount(calcTileCount(window.innerWidth, window.innerHeight));
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   const tiles = Array.from(
-    { length: WALLPAPER_TILE_COUNT },
+    { length: tileCount },
     (_, i) => presidents[i % presidents.length],
   );
 

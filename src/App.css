@@ -198,6 +198,23 @@
   background: var(--cream);
 }
 
+/* Soft white halo radial gradient that sits between the wallpaper and the
+   card. Lifts the center toward paper-white so the card pops, while the
+   edges keep the warm cream and the portraits stay visible there. */
+.splash::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 80% 70% at center,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.25) 35%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
 .splash-wallpaper {
   position: absolute;
   inset: 0;
@@ -205,9 +222,10 @@
   grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
   gap: 6px;
   padding: 8px;
-  opacity: 0.22;
+  opacity: 0.4;
   pointer-events: none;
   align-content: start;
+  z-index: 0;
 }
 
 .splash-tile {
@@ -228,7 +246,7 @@
 
 .splash-card {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   background: var(--paper);
   border: 1px solid var(--border);
   border-radius: 18px;
